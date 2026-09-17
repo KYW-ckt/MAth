@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兩位數乘法蟲食算練習</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ec4b6;
+            --error-color: #e71d36;
+            --bg-color: #f7f9fc;
+            --card-bg: #ffffff;
+            --text-color: #2b2d42;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .instruction {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .vertical-math {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2rem;
+            font-weight: bold;
+            display: inline-block;
+            text-align: right;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .math-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 4px;
+        }
+
+        .line {
+            border-bottom: 3px solid var(--text-color);
+            margin: 8px 0;
+            width: 100%;
+        }
+
+        input.box-input {
+            width: 45px;
+            height: 45px;
+            font-size: 1.8rem;
+            font-family: inherit;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background-color: #eef5ff;
+            color: var(--primary-color);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input.box-input:focus {
+            border-color: #1d63b8;
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+            background-color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #357abd;
+        }
+
+        .btn-next {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #5a6268;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 1.6em;
+        }
+
+        .correct {
+            color: var(--success-color);
+        }
+
+        .incorrect {
+            color: var(--error-color);
+        }
+
+        .score-board {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>蟲食算練習</h1>
+    <div class="instruction">
+        計算順序：先算十位（補0），再算個位。<br>請推算被吃掉的 <strong>□</strong> 數字！
+    </div>
+
+    <div class="vertical-math" id="quiz-container">
+        <!-- 由 JavaScript 動態生成 -->
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-submit" onclick="checkAnswer()">檢查答案</button>
+        <button class="btn-next" onclick="generateQuiz()">下一題</button>
+    </div>
+
+    <div id="feedback"></div>
+    <div class="score-board">
+        答對：<span id="score">0</span> 題
+    </div>
+</div>
+
+<script>
+    let currentAnswer = null;
+    let score = 0;
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateQuiz() {
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').className = '';
+
+        // 隨機生成兩個兩位數 (10-99)
+        const num1 = getRandomInt(11, 99);
+        const num2 = getRandomInt(11, 99);
+
+        const tensDigit = Math.floor(num2 / 10);
+        const unitsDigit = num2 % 10;
+
+        const row1 = num1 * tensDigit * 10; // 先算十位補0
+        const row2 = num1 * unitsDigit;     // 再算個位
+        const total = num1 * num2;
+
+        // 決定隱藏哪一個位置 (0: 被乘數, 1: 乘數, 2: 十位層, 3: 個位層, 4: 結果)
+        const hideTarget = getRandomInt(0, 4);
+
+        let n1Str = num1.toString();
+        let n2Str = num2.toString();
+        let r1Str = row1.toString().padStart(4, ' ');
+        let r2Str = row2.toString().padStart(4, ' ');
+        let totStr = total.toString().padStart(4, ' ');
+
+        let html = '';
+
+        // 輔助函式：將字串轉為HTML，若遇到被隱藏的位元則替換為 input
+        function formatRow(str, targetIdx, activeRow) {
+            let res = '';
+            for (let i = 0; i < str.length; i++) {
+                if (str[i] === ' ') {
+                    res += '&nbsp;&nbsp;';
+                } else if (hideTarget === activeRow && i === targetIdx) {
+                    currentAnswer = str[i];
+                    res += `<input type="number" id="user-input" class="box-input" min="0" max="9" maxlength="1" autofocus autocomplete="off">`;
+                } else {
+                    res += str[i] + ' ';
+                }
+            }
+            return res;
+        }
+
+        // 決定該行的哪個字元被挖空
+        let targetDigitIdx = 0;
+        if (hideTarget === 0) targetDigitIdx = getRandomInt(0, 1);
+        else if (hideTarget === 1) targetDigitIdx = getRandomInt(0, 1);
+        else if (hideTarget === 2) targetDigitIdx = getRandomInt(r1Str.search(/\S/), 3);
+        else if (hideTarget === 3) targetDigitIdx = getRandomInt(r2Str.search(/\S/), 3);
+        else if (hideTarget === 4) targetDigitIdx = getRandomInt(totStr.search(/\S/), 3);
+
+        html += `<div class="math-row">&nbsp;&nbsp;${formatRow(n1Str, targetDigitIdx, 0)}</div>`;
+        html += `<div class="math-row">x&nbsp;&nbsp;${formatRow(n2Str, targetDigitIdx, 1)}</div>`;
+        html += `<div class="line"></div>`;
+        html += `<div class="math-row">${formatRow(r1Str, targetDigitIdx, 2)}</div>`;
+        html += `<div class="math-row">${formatRow(r2Str, targetDigitIdx, 3)}</div>`;
+        html += `<div class="line"></div>`;
+        html += `<div class="math-row">${formatRow(totStr, targetDigitIdx, 4)}</div>`;
+
+        document.getElementById('quiz-container').innerHTML = html;
+
+        // 綁定 Enter 鍵提交
+        const inputEl = document.getElementById('user-input');
+        if(inputEl) {
+            inputEl.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+    }
+
+    function checkAnswer() {
+        const inputEl = document.getElementById('user-input');
+        const feedbackEl = document.getElementById('feedback');
+
+        if (!inputEl || inputEl.value === '') {
+            feedbackEl.textContent = '請輸入答案！';
+            feedbackEl.className = 'incorrect';
+            return;
+        }
+
+        if (inputEl.value === currentAnswer) {
+            feedbackEl.textContent = '🎉 答對了！太棒了！';
+            feedbackEl.className = 'correct';
+            score++;
+            document.getElementById('score').textContent = score;
+            inputEl.disabled = true;
+        } else {
+            feedbackEl.textContent = '❌ 再試試看喔！';
+            feedbackEl.className = 'incorrect';
+        }
+    }
+
+    // 初始化第一題
+    generateQuiz();
+</script>
+
+</body>
+</html>
