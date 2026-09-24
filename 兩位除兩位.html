@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 蟲食算大冒險 - 進階除法 🐛</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF5F7;
+            --card-bg: #FFFFFF;
+            --primary-color: #FF85A1;
+            --secondary-color: #B5E2FA;
+            --accent-color: #FFD166;
+            --text-color: #5C4B51;
+            --success-color: #06D6A0;
+            --error-color: #EF476F;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Zen Maru Gothic', 'Fredoka One', cursive, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#FFC6FF 15%, transparent 16%), radial-gradient(#E8AEB7 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 35px 30px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 20px 40px rgba(255, 133, 161, 0.2);
+            border: 6px solid #FFF;
+            text-align: center;
+            position: relative;
+        }
+
+        .title {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #FFE5EC;
+        }
+
+        .instruction {
+            color: #8D7B83;
+            font-size: 15px;
+            margin-bottom: 25px;
+            background: #FFF0F3;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* 統計與計分板 */
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: #F0F7F4;
+            padding: 12px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .score-item {
+            font-size: 16px;
+        }
+        .score-item span {
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+
+        /* 算式區域（直式） */
+        .math-container {
+            font-size: 34px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        .division-grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 12px 10px; /* 增加上下與左右間距 */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 除法直式符號結構 */
+        .quotient-row {
+            grid-column: 2;
+            text-align: right;
+            padding-right: 14px;
+            min-height: 52px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px; /* 拉開數字間距 */
+        }
+
+        .divisor-dividend-row {
+            grid-column: 1 / span 2;
+            display: flex;
+            align-items: center;
+        }
+
+        .divisor {
+            padding-right: 14px; /* 除數與算式線的間距 */
+            display: flex;
+            gap: 8px;
+        }
+
+        .dividend-box {
+            border-top: 4px solid var(--text-color);
+            border-left: 4px solid var(--text-color);
+            border-top-left-radius: 12px;
+            padding: 6px 14px 6px 14px;
+            display: flex;
+            gap: 8px; /* 被除數數字之間的間距 */
+        }
+
+        .step-row {
+            grid-column: 2;
+            text-align: right;
+            padding-right: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px; /* 過程與餘數間距 */
+        }
+
+        .sub-line {
+            border-bottom: 3px solid var(--text-color);
+            padding-bottom: 4px;
+        }
+
+        /* 數字與蟲食填空格的寬度一致化 */
+        .char-item {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 44px;
+            height: 52px;
+        }
+
+        .bug-box {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 44px;
+            height: 52px;
+            background-color: var(--accent-color);
+            border-radius: 14px;
+            position: relative;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1);
+        }
+
+        .bug-box::after {
+            content: "🐛";
+            position: absolute;
+            font-size: 18px;
+            top: -10px;
+            right: -8px;
+            transform: rotate(15deg);
+        }
+
+        .bug-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: #333;
+            outline: none;
+        }
+
+        /* 按鈕區 */
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn-check {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-next {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        /* 提示與反饋訊息 */
+        .feedback {
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            height: 30px;
+        }
+
+        .correct { color: var(--success-color); }
+        .wrong { color: var(--error-color); }
+
+        /* 答對動畫 */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .bounce { animation: bounce 0.5s ease infinite; }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <h1 class="title">🐛 蟲食算大冒險 🍎</h1>
+    <div class="instruction">小蟲蟲吃掉了某些數字！快幫忙算出來吧～</div>
+
+    <div class="score-board">
+        <div class="score-item">答對：<span id="score">0</span> 題</div>
+        <div class="score-item">連續答對：<span id="streak">0</span> 題</div>
+    </div>
+
+    <!-- 直式計算區 -->
+    <div class="math-container">
+        <div class="division-grid">
+            <!-- 商數 -->
+            <div class="quotient-row" id="quotient-area"></div>
+            
+            <!-- 除數與被除數 -->
+            <div class="divisor-dividend-row">
+                <div class="divisor" id="divisor-area"></div>
+                <div class="dividend-box" id="dividend-area"></div>
+            </div>
+
+            <!-- 過程：乘積 -->
+            <div class="step-row sub-line" id="product-area"></div>
+
+            <!-- 餘數 -->
+            <div class="step-row" id="remainder-area"></div>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="btn-group">
+        <button class="btn btn-check" onclick="checkAnswer()">檢查答案 ✨</button>
+        <button class="btn btn-next" onclick="generateProblem()">下一題 🎲</button>
+    </div>
+</div>
+
+<script>
+    let currentProblem = {};
+    let score = 0;
+    let streak = 0;
+
+    function generateProblem() {
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').className = 'feedback';
+
+        // 隨機生成除數（11~99）
+        const divisor = Math.floor(Math.random() * 89) + 11;
+        
+        // 難度控制：商數必須大於 2 (選取 3 ~ 9)
+        const quotient = Math.floor(Math.random() * 7) + 3;
+        
+        // 餘數必不為 0 (1 ~ divisor - 1)
+        const remainder = Math.floor(Math.random() * (divisor - 1)) + 1;
+        
+        const dividend = divisor * quotient + remainder;
+        const product = divisor * quotient;
+
+        // 確保被除數與乘積維持在兩位數 (10~99)
+        if (dividend >= 100 || product >= 100) {
+            return generateProblem();
+        }
+
+        currentProblem = { divisor, dividend, quotient, product, remainder };
+
+        // 隨機選擇 1~2 個位置進行挖空
+        const hideTargets = selectHideTargets();
+
+        renderArea('divisor-area', divisor.toString(), hideTargets, 'divisor');
+        renderArea('dividend-area', dividend.toString(), hideTargets, 'dividend');
+        renderArea('quotient-area', quotient.toString(), hideTargets, 'quotient');
+        renderArea('product-area', product.toString(), hideTargets, 'product');
+        renderArea('remainder-area', remainder.toString(), hideTargets, 'remainder');
+    }
+
+    function selectHideTargets() {
+        const targets = ['dividend_1', 'divisor_1', 'quotient', 'product_0', 'remainder_0'];
+        const shuffled = targets.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, Math.floor(Math.random() * 2) + 1);
+    }
+
+    function renderArea(elementId, valueStr, hideTargets, prefix) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+
+        if (!valueStr) return;
+
+        for (let i = 0; i < valueStr.length; i++) {
+            const char = valueStr[i];
+            const targetKey = `${prefix}_${i}`;
+            const isHidden = hideTargets.includes(targetKey) || hideTargets.includes(prefix);
+
+            if (isHidden) {
+                const box = document.createElement('div');
+                box.className = 'bug-box';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.className = 'bug-input';
+                input.dataset.answer = char;
+                input.oninput = (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                };
+
+                box.appendChild(input);
+                container.appendChild(box);
+            } else {
+                const span = document.createElement('div');
+                span.className = 'char-item';
+                span.textContent = char;
+                container.appendChild(span);
+            }
+        }
+    }
+
+    function checkAnswer() {
+        const inputs = document.querySelectorAll('.bug-input');
+        if (inputs.length === 0) return;
+
+        let allCorrect = true;
+
+        inputs.forEach(input => {
+            if (input.value !== input.dataset.answer) {
+                allCorrect = false;
+            }
+        });
+
+        const feedback = document.getElementById('feedback');
+        if (allCorrect) {
+            feedback.textContent = '🎉 太棒了！答對囉！';
+            feedback.className = 'feedback correct bounce';
+            score += 10;
+            streak += 1;
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+        } else {
+            feedback.textContent = '❌ 再試試看喔！';
+            feedback.className = 'feedback wrong';
+            streak = 0;
+            document.getElementById('streak').textContent = streak;
+        }
+    }
+
+    // 初始化第一題
+    generateProblem();
+</script>
+</body>
+</html>
